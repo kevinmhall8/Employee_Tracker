@@ -171,3 +171,24 @@ function addEmployee() {
       start();
     })
 }
+
+function viewDepartment() {
+  inquirer
+    .prompt({
+      name: "selected_department",
+      type: "input",
+      message: "Select the department to view employee list"
+    })
+    .then(function (answer) {
+      var query =
+        `SELECT employee_table.employee_first, employee_table.employee_last, employee_table.role_id, employee_table.manager_id FROM employee_table INNER JOIN role_table ON (employee_table.role_id = role_table.id) WHERE (employee_table.role_id = ${answer.selected_department})`
+      connection.query(query, function (err, res) {
+        if (err) {
+          throw err;
+        }
+        console.table(res);
+        start();
+      })
+    })
+}
+
