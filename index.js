@@ -193,16 +193,22 @@ function viewDepartment() {
 }
 
 function viewRole() {
-  connection.query("SELECT * FROM role", function(err, res) {
-    if (err) throw err;
+  var query = `SELECT * FROM role`;
+  connection.query(query, function(err, res) {
+    if (err) {
+      throw err;
+    }
     console.table(res);
     start();
   });
 }
 
 function viewEmployee() {
-  connection.query("SELECT * FROM employee", function(err, res) {
-    if (err) throw err;
+  var query = `SELECT * FROM employee`;
+  connection.query(query, function(err, res) {
+    if (err) {
+      throw err;
+    }
     console.table(res);
     start();
   });
