@@ -12,7 +12,7 @@ var connection = mysql.createConnection({
   user: "root",
 
   // Your password
-  password: "",
+  password: "hall3349",
   database: "employees_DB"
 });
 
@@ -51,8 +51,8 @@ function start() {
         case "View Department":
           viewDepartment()
           break;
-        case "View Roll":
-          viewRoll();
+        case "View Role":
+          viewRole();
           break;
         case "View Employee":
           viewEmployee();
@@ -192,3 +192,18 @@ function viewDepartment() {
     })
 }
 
+function viewRole() {
+  connection.query("SELECT * FROM role", function(err, res) {
+    if (err) throw err;
+    console.table(res);
+    start();
+  });
+}
+
+function viewEmployee() {
+  connection.query("SELECT * FROM employee", function(err, res) {
+    if (err) throw err;
+    console.table(res);
+    start();
+  });
+}
