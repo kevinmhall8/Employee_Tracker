@@ -143,7 +143,7 @@ function addEmployee() {
   {
     name: "role_id",
     type: "input",
-    message: "What is the employee's manager ID?"
+    message: "What is the employee's role ID?"
   },
   {
     name: "manager_id",
