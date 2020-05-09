@@ -13,7 +13,7 @@ var connection = mysql.createConnection({
 
   // Your password
   password: "hall3349",
-  database: "employees_DB"
+  database: "employees_db"
 });
 
 connection.connect(function (err) {
@@ -31,9 +31,9 @@ function start() {
         "Add Role",
         "Add Employee",
         "View Department",
-        "View Roll",
+        "View Role",
         "View Employee",
-        "Update Roll",
+        "Update Employee Role",
         "Finished"
       ]
     })
@@ -57,8 +57,8 @@ function start() {
         case "View Employee":
           viewEmployee();
           break;
-        case "Update Employee":
-          updateEmployee();
+        case "Update Employee Role":
+          updateRole();
           break;
         case "Finished":
           connection.end();
@@ -77,13 +77,13 @@ function addDepartment() {
     .then(function (answer) {
       var departmentName = answer.department_name;
       console.log("Adding Deparment.../n");
-      var query = conncetion.query("INSERT INTO department_table SET ?",
+      var query = connection.query("INSERT INTO department_table SET ?",
         {
           name: departmentName
         },
         function (err, res) {
           if (err) throw err;
-          console.log(res.affectedRows + "department added.\n")
+          console.log(" Department added.\n")
         })
       console.log(query.sql);
     })
@@ -112,15 +112,15 @@ function addRole() {
     ])
     .then(function (answer) {
       console.log("Adding Role...\n")
-      var query = conncetion.query("INSERT INTO role_table SET ?",
+      var query = connection.query("INSERT INTO role_table SET ?",
         {
           title: answer.role_title,
           salary: answer.role_salary,
-          deparment_id: answer.department_id
+          department_id: answer.department_id
         },
         function (err, res) {
           if (err) throw err;
-          console.log(res.affectedRows + "role added.\n")
+          console.log("role added.\n")
         })
       console.log(query.sql)
     })
@@ -151,7 +151,7 @@ function addEmployee() {
     message: "What is the employee's manager ID?"
   }])
     .then(function (answer) {
-      console.log("Adding a new role...\n");
+      console.log("Adding a new employee...\n");
       var query = connection.query(
         "INSERT INTO employee_table SET ?",
         {
@@ -162,7 +162,7 @@ function addEmployee() {
         },
         function (err, res) {
           if (err) throw err;
-          console.log(res.affectedRows + " employee added.\n")
+          console.log("Employee added.\n")
         }
       )
       console.log(query.sql);
@@ -173,27 +173,16 @@ function addEmployee() {
 }
 
 function viewDepartment() {
-  inquirer
-    .prompt({
-      name: "selected_department",
-      type: "input",
-      message: "Select the department to view employee list"
-    })
-    .then(function (answer) {
-      var query =
-        `SELECT employee_table.employee_first, employee_table.employee_last, employee_table.role_id, employee_table.manager_id FROM employee_table INNER JOIN role_table ON (employee_table.role_id = role_table.id) WHERE (employee_table.role_id = ${answer.selected_department})`
-      connection.query(query, function (err, res) {
-        if (err) {
-          throw err;
-        }
-        console.table(res);
-        start();
-      })
-    })
+  var query = `SELECT * FROM department_table`
+  connection.query(query, function(err, res) {
+    if (err) throw err;
+    console.table(res);
+    start();
+  });
 }
 
 function viewRole() {
-  var query = `SELECT * FROM role`;
+  var query = `SELECT * FROM role_table`;
   connection.query(query, function(err, res) {
     if (err) {
       throw err;
@@ -204,12 +193,52 @@ function viewRole() {
 }
 
 function viewEmployee() {
-  var query = `SELECT * FROM employee`;
+  var query = `SELECT * FROM employee_table`;
   connection.query(query, function(err, res) {
     if (err) {
       throw err;
     }
     console.table(res);
     start();
+  });
+}
+
+function updateRole() {
+  connection.query("SELECT employee_table.id, employee_table.first_name, employee_table.last_name FROM employee_table", 
+  function(err, res) {
+    var empChoices = res.map(({ id, first_name, last_name }) => ({ value: id, name: `${first_name} ${last_name}` }));
+  connection.query("SELECT id, title FROM role_table", 
+  function(err, results) {
+    var roleChoices = results.map(({ id, title }) => ({
+      value: id,
+      name: title
+    }));
+    inquirer
+      .prompt([
+        {
+          name: "employee",
+          type: "list",
+          message: "Which employee would you like to adjust the role for?",
+          choices: empChoices
+        },
+        {
+          name: "new_role",
+          type: "list",
+          message: "What is their updated role?",
+          choices: roleChoices
+        }
+      ])
+      .then(function(answer) {
+        connection.query(
+          "UPDATE employee_table SET role_id = ? WHERE id = ?",
+          [answer.employee, answer.new_role],
+          function(err) {
+            if (err) throw err;
+            console.log("Employee's role has been updated");
+            start();
+          }
+        );
+      });
+  });
   });
 }
